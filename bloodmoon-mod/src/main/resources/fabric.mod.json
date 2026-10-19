@@ -1,0 +1,32 @@
+{
+	"schemaVersion": 1,
+	"id": "bloodmoon",
+	"version": "${version}",
+	"name": "Blood Moon",
+	"description": "Every 20th night a Blood Moon rises: doubled monster spawns, buffed mobs, bonus loot, door-breaking zombies and a red sky. Server-side only - vanilla clients can join.",
+	"authors": [
+		"Your Name"
+	],
+	"contact": {
+		"homepage": "https://modrinth.com/mod/bloodmoon",
+		"sources": "https://github.com/your-name/bloodmoon",
+		"issues": "https://github.com/your-name/bloodmoon/issues"
+	},
+	"license": "MIT",
+	"icon": "assets/bloodmoon/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"dev.bloodmoon.BloodMoonMod"
+		]
+	},
+	"mixins": [
+		"bloodmoon.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.19.5",
+		"minecraft": "~26.3",
+		"java": ">=25",
+		"fabric-api": "*"
+	}
+}

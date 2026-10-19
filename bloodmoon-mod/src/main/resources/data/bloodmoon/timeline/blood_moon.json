@@ -1,0 +1,90 @@
+{
+	"clock": "minecraft:overworld",
+	"period_ticks": 480000,
+	"tracks": {
+		"minecraft:visual/sky_color": {
+			"modifier": "add",
+			"keyframes": [
+				{
+					"ticks": 467500,
+					"value": "#000000"
+				},
+				{
+					"ticks": 469500,
+					"value": "#6e0a0a"
+				},
+				{
+					"ticks": 478500,
+					"value": "#6e0a0a"
+				},
+				{
+					"ticks": 479900,
+					"value": "#000000"
+				}
+			]
+		},
+		"minecraft:visual/fog_color": {
+			"modifier": "add",
+			"keyframes": [
+				{
+					"ticks": 467500,
+					"value": "#000000"
+				},
+				{
+					"ticks": 469500,
+					"value": "#4a0606"
+				},
+				{
+					"ticks": 478500,
+					"value": "#4a0606"
+				},
+				{
+					"ticks": 479900,
+					"value": "#000000"
+				}
+			]
+		},
+		"minecraft:visual/cloud_color": {
+			"modifier": "add",
+			"keyframes": [
+				{
+					"ticks": 467500,
+					"value": "#00000000"
+				},
+				{
+					"ticks": 469500,
+					"value": "#00500c0c"
+				},
+				{
+					"ticks": 478500,
+					"value": "#00500c0c"
+				},
+				{
+					"ticks": 479900,
+					"value": "#00000000"
+				}
+			]
+		},
+		"minecraft:visual/sky_light_color": {
+			"modifier": "multiply",
+			"keyframes": [
+				{
+					"ticks": 467500,
+					"value": "#ffffff"
+				},
+				{
+					"ticks": 469500,
+					"value": "#ff8a8a"
+				},
+				{
+					"ticks": 478500,
+					"value": "#ff8a8a"
+				},
+				{
+					"ticks": 479900,
+					"value": "#ffffff"
+				}
+			]
+		}
+	}
+}
