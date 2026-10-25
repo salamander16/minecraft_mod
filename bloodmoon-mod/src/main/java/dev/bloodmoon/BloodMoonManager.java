@@ -254,22 +254,22 @@ public final class BloodMoonManager {
 				if (spawnCopy(level, original)) {
 					extraAlive++;
 				}
+			}
+		}
+	}
 
-				private static void applyToLoadedMobs(ServerLevel level) {
-					for (Entity entity : level.getAllEntities()) {
-						if (isBloodMoonTarget(entity)) {
-							MobBuffs.apply((Mob) entity, level);
-						}
-					}
-				}
+	private static void applyToLoadedMobs(ServerLevel level) {
+		for (Entity entity : level.getAllEntities()) {
+			if (isBloodMoonTarget(entity)) {
+				MobBuffs.apply((Mob) entity, level);
+			}
+		}
+	}
 
-				private static void revertLoadedMobs(ServerLevel level) {
-					for (Entity entity : level.getAllEntities()) {
-						if (entity instanceof Mob mob && mob.getTags().contains(TAG_BUFFED)) {
-							MobBuffs.remove(mob, level);
-						}
-					}
-				}
+	private static void revertLoadedMobs(ServerLevel level) {
+		for (Entity entity : level.getAllEntities()) {
+			if (entity instanceof Mob mob && mob.getTags().contains(TAG_BUFFED)) {
+				MobBuffs.remove(mob, level);
 			}
 		}
 	}
