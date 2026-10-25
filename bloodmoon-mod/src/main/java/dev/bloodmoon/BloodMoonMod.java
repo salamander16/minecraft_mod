@@ -30,6 +30,6 @@ public class BloodMoonMod implements ModInitializer {
 
 		CommandRegistrationCallback.EVENT.register(BloodMoonCommand::register);
 
-		LOGGER.info("Blood Moon loaded - the red night comes every {} nights.", BloodMoonConfig.get().intervalNights);
+		LOGGER.info("Blood Moon loaded - every night is a blood moon.");
 	}
 }

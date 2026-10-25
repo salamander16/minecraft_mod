@@ -1,6 +1,6 @@
 # Blood Moon (Fabric, Minecraft 26.3)
 
-Every **20th night** a Blood Moon rises. It is a **server-side mod**: players join with a
+Every **night** a Blood Moon rises. It is a **server-side mod**: players join with a
 completely vanilla client, nothing to install on their side.
 
 | | |
@@ -49,7 +49,7 @@ the real clock, so to see it use `/time` to jump to the 20th night.
 
 | Option | Default | Meaning |
 |---|---|---|
-| `intervalNights` | 20 | Blood moon every N nights (see note on the red sky below) |
+| `intervalNights` | 1 | Legacy setting (gameplay now runs every night) |
 | `spawnMultiplier` | 2.0 | 2.0 = double, 3.0 = triple |
 | `maxExtraMobs` | 150 | Cap of bonus mobs alive at once |
 | `healthMultiplier` / `followRange` | 1.5 / 48 | Mob toughness / detection range |

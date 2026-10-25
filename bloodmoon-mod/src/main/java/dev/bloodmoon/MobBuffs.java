@@ -26,9 +26,27 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
 /** Applies the blood-moon upgrades to a freshly spawned monster. */
 public final class MobBuffs {
 	private static final int INFINITE = -1;
+	private static final Map<UUID, StoredState> STORED = new HashMap<>();
+
+	private static final class StoredState {
+		double maxHealthBase;
+		double followRangeBase;
+		ItemStack mainHand;
+		ItemStack offHand;
+		ItemStack head;
+		ItemStack chest;
+		ItemStack legs;
+		ItemStack feet;
+		boolean hadExplosiveTag;
+		BreachGoal breachGoal;
+	}
 
 	private MobBuffs() {
 	}
@@ -37,6 +55,7 @@ public final class MobBuffs {
 		if (mob.getTags().contains(BloodMoonManager.TAG_BUFFED)) {
 			return;
 		}
+		StoredState state = captureState(mob);
 		mob.addTag(BloodMoonManager.TAG_BUFFED);
 
 		BloodMoonConfig cfg = BloodMoonConfig.get();
@@ -74,7 +93,9 @@ public final class MobBuffs {
 				armorUp(level, zombie, random);
 			}
 			if (cfg.breakEntrances) {
-				((MobAccessor) (Object) zombie).bloodmoon$getGoalSelector().addGoal(1, new BreachGoal(zombie));
+				BreachGoal goal = new BreachGoal(zombie);
+				((MobAccessor) (Object) zombie).bloodmoon$getGoalSelector().addGoal(1, goal);
+				state.breachGoal = goal;
 			}
 		}
 
@@ -85,6 +106,35 @@ public final class MobBuffs {
 			enchant(level, trident, Enchantments.IMPALING, 3);
 			drowned.setItemSlot(EquipmentSlot.MAINHAND, trident);
 		}
+	}
+
+	public static void remove(Mob mob, ServerLevel level) {
+		StoredState state = STORED.remove(mob.getUUID());
+		if (state == null && !mob.getTags().contains(BloodMoonManager.TAG_BUFFED)) {
+			return;
+		}
+
+		if (state != null) {
+			restoreBase(mob, Attributes.MAX_HEALTH, state.maxHealthBase);
+			restoreBase(mob, Attributes.FOLLOW_RANGE, state.followRangeBase);
+			restoreEquipment(mob, state);
+			if (state.breachGoal != null && mob instanceof Zombie) {
+				((MobAccessor) (Object) mob).bloodmoon$getGoalSelector().removeGoal(state.breachGoal);
+			}
+			if (!state.hadExplosiveTag) {
+				mob.removeTag(BloodMoonManager.TAG_EXPLOSIVE);
+			}
+		} else {
+			mob.removeTag(BloodMoonManager.TAG_EXPLOSIVE);
+		}
+		mob.setHealth(Math.min(mob.getHealth(), mob.getMaxHealth()));
+		mob.removeEffect(MobEffects.SPEED);
+		mob.removeEffect(MobEffects.INVISIBILITY);
+		mob.removeTag(BloodMoonManager.TAG_BUFFED);
+	}
+
+	public static void clearTracking() {
+		STORED.clear();
 	}
 
 	private static void armorUp(ServerLevel level, Zombie zombie, RandomSource random) {
@@ -132,5 +182,45 @@ public final class MobBuffs {
 		if (instance != null && instance.getBaseValue() < minimum) {
 			instance.setBaseValue(minimum);
 		}
+	}
+
+	private static void restoreBase(Mob mob, Holder<Attribute> attribute, double baseValue) {
+		AttributeInstance instance = mob.getAttribute(attribute);
+		if (instance != null) {
+			instance.setBaseValue(baseValue);
+		}
+	}
+
+	private static StoredState captureState(Mob mob) {
+		StoredState existing = STORED.get(mob.getUUID());
+		if (existing != null) {
+			return existing;
+		}
+		StoredState state = new StoredState();
+		state.maxHealthBase = baseValue(mob, Attributes.MAX_HEALTH);
+		state.followRangeBase = baseValue(mob, Attributes.FOLLOW_RANGE);
+		state.mainHand = mob.getItemBySlot(EquipmentSlot.MAINHAND).copy();
+		state.offHand = mob.getItemBySlot(EquipmentSlot.OFFHAND).copy();
+		state.head = mob.getItemBySlot(EquipmentSlot.HEAD).copy();
+		state.chest = mob.getItemBySlot(EquipmentSlot.CHEST).copy();
+		state.legs = mob.getItemBySlot(EquipmentSlot.LEGS).copy();
+		state.feet = mob.getItemBySlot(EquipmentSlot.FEET).copy();
+		state.hadExplosiveTag = mob.getTags().contains(BloodMoonManager.TAG_EXPLOSIVE);
+		STORED.put(mob.getUUID(), state);
+		return state;
+	}
+
+	private static double baseValue(Mob mob, Holder<Attribute> attribute) {
+		AttributeInstance instance = mob.getAttribute(attribute);
+		return instance == null ? 0.0 : instance.getBaseValue();
+	}
+
+	private static void restoreEquipment(Mob mob, StoredState state) {
+		mob.setItemSlot(EquipmentSlot.MAINHAND, state.mainHand.copy());
+		mob.setItemSlot(EquipmentSlot.OFFHAND, state.offHand.copy());
+		mob.setItemSlot(EquipmentSlot.HEAD, state.head.copy());
+		mob.setItemSlot(EquipmentSlot.CHEST, state.chest.copy());
+		mob.setItemSlot(EquipmentSlot.LEGS, state.legs.copy());
+		mob.setItemSlot(EquipmentSlot.FEET, state.feet.copy());
 	}
 }
