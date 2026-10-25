@@ -18,8 +18,8 @@ public final class BloodMoonConfig {
 	private static BloodMoonConfig instance = new BloodMoonConfig();
 
 	// ---- Schedule ---------------------------------------------------------------------------
-	/** A blood moon happens on every Nth night. NOTE: the red sky (datapack) is fixed to 20. */
-	public int intervalNights = 20;
+	/** Legacy setting: blood moon gameplay now runs every night. */
+	public int intervalNights = 1;
 	/** Day-time tick (0-23999) at which "night" starts / ends for the blood moon. */
 	public int nightStartTick = 13000;
 	public int nightEndTick = 23000;

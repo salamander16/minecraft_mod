@@ -48,6 +48,7 @@ public final class BloodMoonManager {
 		tickCounter = 0;
 		extraAlive = 0;
 		PENDING_DUPLICATES.clear();
+		MobBuffs.clearTracking();
 		ExplosiveArrows.clear();
 	}
 
@@ -79,8 +80,8 @@ public final class BloodMoonManager {
 		}
 		wasNight = night;
 
-		boolean scheduled = night && (day + 1) % cfg.intervalNights == 0 && day != suppressedDay;
-		boolean shouldBeActive = scheduled || forced;
+		boolean scheduled = night && day != suppressedDay;
+		boolean shouldBeActive = scheduled || (forced && night);
 
 		if (shouldBeActive && !active) {
 			start(server, timeOfDay);
@@ -105,22 +106,22 @@ public final class BloodMoonManager {
 	public static String describe(MinecraftServer server) {
 		BloodMoonConfig cfg = BloodMoonConfig.get();
 		long clock = server.overworld().getDefaultClockTime();
-		long day = Math.floorDiv(clock, 24000L);
 		long timeOfDay = Math.floorMod(clock, 24000L);
 		if (active) {
-			return "The Blood Moon is rising right now! (night " + (day + 1) + ")";
+			return "The Blood Moon is rising right now!";
 		}
-		long nightNo = day + 1 + (timeOfDay >= cfg.nightEndTick ? 1 : 0);
-		long next = ((nightNo + cfg.intervalNights - 1) / cfg.intervalNights) * cfg.intervalNights;
-		long left = next - nightNo;
-		return "Next Blood Moon: night " + next + (left == 0 ? " (tonight!)" : " (in " + left + " night" + (left == 1 ? "" : "s") + ")");
+		return timeOfDay < cfg.nightStartTick
+			? "Next Blood Moon: tonight."
+			: "Next Blood Moon: tomorrow night.";
 	}
 
 	private static void start(MinecraftServer server, long timeOfDay) {
 		BloodMoonConfig cfg = BloodMoonConfig.get();
+		ServerLevel overworld = server.overworld();
 		active = true;
 		extraAlive = 0;
 		PENDING_DUPLICATES.clear();
+		applyToLoadedMobs(overworld);
 		BloodMoonMod.LOGGER.info("The Blood Moon rises.");
 
 		if (cfg.announce) {
@@ -139,6 +140,7 @@ public final class BloodMoonManager {
 		BloodMoonConfig cfg = BloodMoonConfig.get();
 		active = false;
 		PENDING_DUPLICATES.clear();
+		revertLoadedMobs(overworld);
 		BloodMoonMod.LOGGER.info("The Blood Moon fades.");
 
 		// Remove bonus mobs.
@@ -203,6 +205,14 @@ public final class BloodMoonManager {
 		if (entity instanceof AbstractArrow arrow) {
 			ExplosiveArrows.maybeTrack(arrow);
 		}
+		if (!(entity instanceof Mob mob) || level.dimension() != Level.OVERWORLD || !isBloodMoonTarget(entity)) {
+			return;
+		}
+		if (active) {
+			MobBuffs.apply(mob, level);
+		} else if (mob.getTags().contains(TAG_BUFFED)) {
+			MobBuffs.remove(mob, level);
+		}
 	}
 
 	public static void onBonusMobDied() {
@@ -243,6 +253,22 @@ public final class BloodMoonManager {
 				}
 				if (spawnCopy(level, original)) {
 					extraAlive++;
+				}
+
+				private static void applyToLoadedMobs(ServerLevel level) {
+					for (Entity entity : level.getAllEntities()) {
+						if (isBloodMoonTarget(entity)) {
+							MobBuffs.apply((Mob) entity, level);
+						}
+					}
+				}
+
+				private static void revertLoadedMobs(ServerLevel level) {
+					for (Entity entity : level.getAllEntities()) {
+						if (entity instanceof Mob mob && mob.getTags().contains(TAG_BUFFED)) {
+							MobBuffs.remove(mob, level);
+						}
+					}
 				}
 			}
 		}
